@@ -36,7 +36,7 @@ def get_autocorrelation(x, t):
     return y
 
 
-def get_autocorrelation_symm(x, n=1):
+def get_autocorrelation_windowed(x, n=1):
     """
     Calculates a discrete autocorrelation on [0, (len(x)-1)/n]
     x is assumed 1D array-like, n is the shrinking factor
