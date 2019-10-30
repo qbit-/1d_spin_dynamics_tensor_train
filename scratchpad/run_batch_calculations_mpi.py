@@ -2,7 +2,11 @@ from __future__ import print_function, absolute_import, division
 from functools import partial
 import tt
 import numpy as np
+import sys
+if '../' not in sys.path:
+    sys.path.append('../')
 import src as dyn
+
 
 L = 4200
 K = 10000
