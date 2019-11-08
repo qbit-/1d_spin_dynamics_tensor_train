@@ -10,4 +10,5 @@ from .dynamics import (collect_ev_sequential,
                        collect_ev_parallel_mpi)
 
 from .derivatives import (mean_sd,
-                          get_autocorrelation_windowed)
+                          autocorr_windowed_over_axis,
+                          corr_windowed_over_axis,)
