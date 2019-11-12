@@ -75,7 +75,7 @@ def collect_ev_sequential(
             t += tau
 
         evs_all_l.append(evs)
-        if (dump_every > 0) and (s // dump_every == 0) and (s != 0):
+        if (dump_every > 0) and (s // dump_every == 0):
             # time to dump results
             evs_all = np.array(evs_all_l).real
             time = np.array(time_l)
@@ -344,8 +344,7 @@ def collect_ev_parallel(H, operators, guess_generator, rank,
                 pbar.update()
                 n_batches += 1
                 if ((dump_every > 0)
-                    and (n_batches // dump_every == 0) and (
-                        n_batches != 0)):
+                    and (n_batches // dump_every == 0)):
                     # time to dump results
                     evs_all = np.array(evs_all_l).real
                     time = np.array(time)
