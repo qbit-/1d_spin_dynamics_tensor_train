@@ -28,7 +28,8 @@ def gen_1site_1d_operator(matrix, spacer, site_num, dimension):
     return result
 
 
-def gen_heisenberg_hamiltonian(dimension, Jx=0.5, Jz=0.5):
+def gen_heisenberg_hamiltonian(dimension, Jx=0.5, Jz=0.5,
+                               periodic=True):
     """
     Generate 1D Heisenberg hamiltonian
     Parameters:
@@ -39,6 +40,8 @@ def gen_heisenberg_hamiltonian(dimension, Jx=0.5, Jz=0.5):
            Sx coupling strength
     Jz: float
            Sz coupling strength
+    periodic: bool
+           If the Hamiltonian will be made periodic
     """
     # Create operators
     sx = [[0, 1], [1, 0]]
@@ -71,8 +74,9 @@ def gen_heisenberg_hamiltonian(dimension, Jx=0.5, Jz=0.5):
         # compress
         Ham = Ham.round(1e-8)
     # Add periodic conditions in the Hamiltonian
-    Ham = Ham + 0.5 * Jx * (ssp[dimension-1] * ssm[0] + ssm[dimension-1] *
-                            ssp[0]) + Jz * (ssz[dimension-1] * ssz[0])
+    if periodic:
+        Ham = Ham + 0.5 * Jx * (ssp[dimension-1] * ssm[0] + ssm[dimension-1] *
+                                ssp[0]) + Jz * (ssz[dimension-1] * ssz[0])
     Ham = Ham.round(1e-8)
     return Ham
 
