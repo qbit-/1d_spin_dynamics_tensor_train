@@ -260,7 +260,7 @@ def gen_projected_gaussian_guess(H, r, eps=1e-10):
 
     return PZ*(1.0 / PZ.norm())
 
-
+ 
 def gen_haar_rmps_guess(H, r):
     """
     Generates a random MPS as described in
@@ -275,6 +275,7 @@ def gen_haar_rmps_guess(H, r):
     """
     # generate tensor with haar distributed cores
     x = tt.rand(H.n, r=r)
+    x = x.round(0)
     x_cores = gen_haar_cores_like(x, left_to_right=True)
     x = x.from_list(x_cores)
 
