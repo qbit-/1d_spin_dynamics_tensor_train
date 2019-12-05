@@ -86,12 +86,11 @@ def corr_windowed(xy, n=1):
     return raw[start:stop] / range(len_total, len_total-len_active-1, -1)
 
 
-def autocorr_windowed_over_axis(X, n=1, axis=1):
+def autocorr_windowed_over_axis(X, n=1, axis_time=1):
     """
     Calculates a discrete autocorrelation on [0, (len(x)-1)/n]
     X is assumed 2D array-like, the autocorrelation is calculated
-    for each row
-    n is the shrinking factor
+    for each row n is the shrinking factor
 
     Parameters:
     -----------
@@ -103,11 +102,15 @@ def autocorr_windowed_over_axis(X, n=1, axis=1):
        Axis along which to calculate
     """
     return np.apply_along_axis(
-        functools.partial(autocorr_windowed, n=n), axis, X)
+        functools.partial(autocorr_windowed, n=n), axis_time, X)
 
 
-def corr_windowed_over_axis(X, n=1, axis=1):
-    new_shape = X.shape[:axis] + (-1,)
-    X = X.reshape(new_shape)
+def corr_windowed_over_axis(X, n=1, axis_time=1, axes_which_data=[0, 1]):
+    """
+    Calculates a dicrete autocorrelation between two indices in the
+    third dimension of the 3D array along a specified axis 1.
+    """
+    new_shape = X.shape[:axis_time] + (-1,)
+    X = X[..., axes_which_data].reshape(new_shape)
     return np.apply_along_axis(
-        functools.partial(corr_windowed, n=n), axis, X)
+        functools.partial(corr_windowed, n=n), axis_time, X)

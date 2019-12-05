@@ -9,6 +9,52 @@ from tt.riemannian.riemannian import project as tt_project
 from tt.riemannian.riemannian import tt_qr
 
 
+def haar_random_unitary(n, m):
+    """
+    Generates m columns of a random unitary
+    of size n distributed according to Haar measure.
+    Parameters:
+    -----------
+    n: int
+       size of the matrix
+    m: int
+       number of columns
+    """
+    assert(m <= n)
+    uf = np.random.randn(n, n)
+    u, r = np.linalg.qr(uf)
+    lam = np.diag(np.diag(r) / (abs(np.diag(r))))
+    return (u @ lam)[:, :m]
+
+
+def gen_haar_cores_like(t, left_to_right=True):
+    """
+    Generates Haar distributed cores for a TT tensor
+    of shape provided by t
+    Parameters:
+    ----------
+    t: tt.tensor
+         tensor to get shape information
+    left_to_right: bool, default True
+         left to right or right to left orthogonalization
+    Returns:
+    --------
+    list
+    """
+    tl = t.to_list(t)
+    haar_cores = []
+    for core in tl:
+        if left_to_right:
+            matrix_shape = [np.prod(core.shape[:-1]), core.shape[-1]]
+            haar_u = haar_random_unitary(*matrix_shape)
+        else:
+            matrix_shape = [np.prod(core.shape[1:]), core.shape[0]]
+            haar_u = haar_random_unitary(*matrix_shape)
+            haar_u = haar_u.T
+        haar_cores.append(haar_u.reshape(core.shape))
+    return haar_cores
+
+
 def gen_zero_energy_guess(H, rank):
     """
     Generate psi such that <psi|H|psi> = 0
@@ -16,7 +62,7 @@ def gen_zero_energy_guess(H, rank):
     -----------
     H: tt.matrix
        hamiltonian in the TT-matrix format
-    rankk: int
+    rank: int
        Rank of the guess
     """
     v = 1.0
