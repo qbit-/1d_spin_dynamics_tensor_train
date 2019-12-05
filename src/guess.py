@@ -256,6 +256,26 @@ def gen_projected_gaussian_guess(H, r, eps=1e-10):
     Z = np.random.randn(*(dimensions))
     Z = tt.tensor(Z)
     PZ = tt_project(x, Z)
-    PZ = PZ.round(0, eps, rmax=r)
+    PZ = PZ.round(eps, rmax=r)
 
     return PZ*(1.0 / PZ.norm())
+
+
+def gen_haar_rmps_guess(H, r):
+    """
+    Generates a random MPS as described in
+    "Typicality in random matrix product states" by Garnerone et al. 
+
+    Parameters:
+    -----------
+    H: tt.matrix
+       Matrix used to infer dimension of a guess vector
+    r: int
+       TT rank of the guess
+    """
+    # generate tensor with haar distributed cores
+    x = tt.rand(H.n, r=r)
+    x_cores = gen_haar_cores_like(x, left_to_right=True)
+    x = x.from_list(x_cores)
+
+    return x

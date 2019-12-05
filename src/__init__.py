@@ -3,7 +3,9 @@ from .operators import (gen_heisenberg_hamiltonian,
                         gen_ksite_magnetization)
 
 from .guess import (gen_rounded_gaussian_guess,
-                    gen_implicit_gaussian_guess)
+                    gen_implicit_gaussian_guess,
+                    gen_projected_gaussian_guess,
+                    gen_haar_rmps_guess)
 
 from .dynamics import (collect_ev_sequential,
                        collect_ev_parallel,
