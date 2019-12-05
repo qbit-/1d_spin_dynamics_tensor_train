@@ -247,6 +247,7 @@ def gen_projected_gaussian_guess(H, r, eps=1e-10):
     """
     # generate tensor with haar distributed cores
     x = tt.rand(H.n, r=r)
+    x = x.round(eps)
     x_cores = gen_haar_cores_like(x, left_to_right=True)
     x = x.from_list(x_cores)
 
@@ -255,6 +256,6 @@ def gen_projected_gaussian_guess(H, r, eps=1e-10):
     Z = np.random.randn(*(dimensions))
     Z = tt.tensor(Z)
     PZ = tt_project(x, Z)
-    PZ = PZ.round(0, rmax=r)
+    PZ = PZ.round(0, eps, rmax=r)
 
     return PZ*(1.0 / PZ.norm())
