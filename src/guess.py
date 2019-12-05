@@ -231,3 +231,30 @@ def gen_rounded_gaussian_guess(H, r, eps=1e-10):
     psi = tt.tensor(psi_full, eps, rmax=r)
     psi = psi*(1.0/psi.norm())
     return psi
+
+
+def gen_projected_gaussian_guess(H, r, eps=1e-10):
+    """
+    Generate full N(0,1) vector and then
+    project it to a random unitary TT of given rank
+
+    Parameters:
+    -----------
+    H: tt.matrix
+       Matrix used to infer dimension of a guess vector
+    r: int
+       TT rank of the guess
+    """
+    # generate tensor with haar distributed cores
+    x = tt.rand(H.n, r=r)
+    x_cores = gen_haar_cores_like(x, left_to_right=True)
+    x = x.from_list(x_cores)
+
+    # project full dimensional gaussian vector to x
+    dimensions = x.n
+    Z = np.random.randn(*(dimensions))
+    Z = tt.tensor(Z)
+    PZ = tt_project(x, Z)
+    PZ = PZ.round(0, rmax=r)
+
+    return PZ*(1.0 / PZ.norm())
