@@ -99,9 +99,9 @@ def gen_ksite_magnetization(dimension, used_sites=None):
         used_sites = np.zeros(dimension)
         if dimension % 2 == 0:
             used_sites[dimension // 2] = 1
+            used_sites[dimension // 2 - 1] = 1
         else:
             used_sites[dimension // 2] = 1
-            used_sites[dimension // 2 - 1] = 1
 
     # Create operators
     sx = [[0, 1], [1, 0]]
