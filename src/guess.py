@@ -260,7 +260,7 @@ def gen_projected_gaussian_guess(H, r, eps=1e-10):
 
     return PZ*(1.0 / PZ.norm())
 
- 
+
 def gen_haar_rmps_guess(H, r):
     """
     Generates a random MPS as described in
@@ -280,3 +280,57 @@ def gen_haar_rmps_guess(H, r):
     x = x.from_list(x_cores)
 
     return x
+
+
+def gen_haar_rmps_cluster_guess(H, cluster_size):
+    """
+    Generates a random MPS as described in
+    "Typicality in random matrix product states" by Garnerone et al.
+
+    Parameters:
+    -----------
+    H: tt.matrix
+       Matrix used to infer dimension of a guess vector
+    cluster_size: int
+       Size of the cluster which is simulated exactly.
+       Notice that this is not the rank! The rank in this
+       case is 2**(cluster_size // 2). Only even sizes were tested
+    """
+    # import pdb
+    # pdb.set_trace()
+    dimension = H.d
+    assert(dimension >= cluster_size)
+
+    half_no_cluster = (dimension - cluster_size) // 2
+    cluster_start = half_no_cluster - 1 if half_no_cluster > 0 else 0
+
+    ranks = [1, ]
+    for i in range(cluster_start):
+        ranks.append(1)
+
+    center_of_cluster = cluster_start + cluster_size // 2 - 1
+    cluster_end = cluster_start + cluster_size - 1
+    if half_no_cluster > 0:
+        cluster_end += 2
+        center_of_cluster += 1
+
+    jj = 0
+    # if the cluster coincides with the system correct
+    # the indices and the exponent counter
+    if half_no_cluster == 0:
+        jj += 1
+
+    for i in range(cluster_start, cluster_end):
+        rank = int(2**jj)
+        ranks.append(rank)
+        if i < center_of_cluster:
+            jj += 1
+        else:
+            jj -= 1
+
+    # add final part
+    for i in range(dimension - half_no_cluster, dimension - 1):
+        ranks.append(1)
+    # add final vector
+    ranks.append(1)
+    return gen_haar_rmps_guess(H, ranks)
