@@ -2,9 +2,10 @@
 This module generates various problem-specific quantities:
 Hamiltonian, Magnetization operator etc
 """
-
 import numpy as np
 import tt
+from scipy.special import xlogy
+import tt.riemannian.riemannian
 
 
 def gen_1site_1d_operator(matrix, spacer, site_num, dimension):
@@ -306,3 +307,61 @@ def gen_scaled_magnetization(dimension, cluster_size):
     scaling_factors = gen_scaling_factors(dimension, cluster_size)
     return gen_ksite_magnetization(dimension, np.ones(dimension),
                                    scaling_factors)
+
+
+def get_entropy(wf, cut_at=None):
+    """
+    Calculates entanglement entropy of the TT wavefunction
+    at the specified cut.
+    If cut is not specified, the entropy is calculated at
+    the middle of the chain.
+    Parameters:
+    -----------
+    wf: tt.Vector
+         Tensor train vector
+    cut_at: int, default None
+         The position of the internal index at which the
+         entropy is calculated. Should be in [0, d-2]
+         If not provided, the cut is assumed at the central
+         internal index for even dimension TT vectors, or
+         at the index left to the central site for odd
+         dimension TT vectors.
+    """
+    # import pdb
+    # pdb.set_trace()
+    num_dimensions = wf.d
+    if cut_at is None:
+        cut_at = wf.d // 2 - 1   # this is the middle bond if d is even
+        # or the bond left to the central cite is d is odd
+    assert(cut_at <= num_dimensions - 2 and cut_at >= 0)
+
+    # Get rid of redundant ranks (they cause technical difficulties).
+    wf = wf.round(eps=0)
+
+    coresX = tt.tensor.to_list(wf)
+
+    # Left orthogonalize cores
+    for current_dim in range(0, cut_at):
+        coresX = tt.riemannian.riemannian.cores_orthogonalization_step(
+            coresX, current_dim, left_to_right=True)
+    # Right orthogonalize cores
+    for current_dim in range(num_dimensions-1, cut_at+1, -1):
+        coresX = tt.riemannian.riemannian.cores_orthogonalization_step(
+            coresX, current_dim, left_to_right=False)
+
+    # Now we have two adjacent non-orthogonal cores at cut_at and cut_at+1
+    # locations. Merge them and perform SVD
+    left_core = coresX[cut_at]
+    right_core = coresX[cut_at+1]
+    r11, n1, r12 = left_core.shape
+    r21, n2, r22 = right_core.shape
+    merged = np.matmul(
+        left_core.reshape([r11 * n1, r12]),
+        right_core.reshape([r21, n2 * r22])
+        )
+    u, s, vh = np.linalg.svd(merged)
+
+    # Truncate singular values to the size of the rank
+    s2 = (s[:r12])**2
+
+    return -np.sum(xlogy(s2, s2))
